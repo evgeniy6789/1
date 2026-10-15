@@ -1,0 +1,1519 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>График смен — Калькулятор Зарплаты (Фиксированный)</title>
+    <link rel="icon" href="favicon.ico" sizes="any">
+    <link rel="icon" href="android-icon-192x192.png" sizes="192x192">
+    <link rel="icon" href="android-icon-512x512.png" sizes="512x512">
+    <link rel="apple-touch-icon" href="apple-touch-icon-180x180.png">
+
+    <style>
+        :root {
+            --g1: #ff007a;
+            --g2: #ffbf00;
+            --g3: #00d4ff;
+            --g4: #7cff00;
+            --card: rgba(255, 255, 255, 0.16);
+            --card-border: rgba(255, 255, 255, 0.35);
+            --text-dark: #111;
+            --text-light: #fff;
+            --highlight-pay: #0056b3;
+        }
+
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+            color: var(--text-light);
+            background-size: 400% 400%;
+            animation: gradientShift 10s ease infinite;
+            transition: background 2s ease;
+            overflow-x: hidden;
+        }
+
+        body.winter {
+            background: linear-gradient(-45deg, #1e3c72, #2a5298, #6dd5fa, #ffffff);
+        }
+
+        body {
+            transition: background-color 0.6s ease, color 0.6s ease;
+        }
+
+        body.night {
+            background-color: #0b0f1a;
+            color: #d6e1ff;
+        }
+
+        body.night .toggle-btn {
+            background: #1a1f2b;
+            color: #ffe680;
+            text-shadow: 0 0 6px rgba(255, 230, 128, 0.8);
+        }
+
+        body.night .toggle-btn {
+            box-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
+        }
+
+        body.night .result-box,
+        body.night .input-container,
+        body.night .summary {
+            box-shadow: 0 0 18px rgba(120, 160, 255, 0.25);
+            transition: box-shadow 0.6s ease;
+        }
+
+        #night-stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            background: transparent;
+            overflow: hidden;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        body.night #night-stars {
+            opacity: 1;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 2s infinite ease-in-out;
+        }
+
+        @keyframes twinkle {
+
+            0%,
+            100% {
+                opacity: 0.2;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        #moon {
+            position: fixed;
+            top: 10%;
+            left: -10%;
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, #fff8cc, #e6d98c);
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(255, 240, 180, 0.6);
+            opacity: 0;
+            transition: opacity 1s ease;
+            animation: moonMove 40s linear infinite;
+            pointer-events: none;
+            z-index: 2;
+
+        }
+
+        body.night #moon {
+            opacity: 1;
+
+        }
+
+        @keyframes moonMove {
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                transform: translateX(120vw);
+            }
+        }
+
+        .readable-text {
+            color: #1a1a1a;
+
+        }
+
+        body.night .readable-text {
+            color: #e8eeff;
+            text-shadow: 0 0 4px rgba(255, 255, 255, 0.25);
+        }
+
+        .hint-text {
+            color: #1a1a1a;
+            font-weight: 500;
+
+        }
+
+        body.night .hint-text {
+            color: #e8eeff;
+            text-shadow: 0 0 4px rgba(255, 255, 255, 0.25);
+
+        }
+
+        body.spring {
+            background: linear-gradient(-45deg, #00c853, #64dd17, #aeea00, #ffea00);
+        }
+
+        body.summer {
+            background: linear-gradient(-45deg, #0077ff, #00c8ff, #00ff88, #f7ff00);
+        }
+
+        body.autumn {
+            background: linear-gradient(-45deg, #eb3349, #f45c43, #ff8c00, #ffd700);
+        }
+
+        body.night {
+            background: linear-gradient(-45deg, #0a0a1a, #111133, #000000, #1a1a2e);
+            animation: gradientShift 12s ease infinite;
+        }
+
+        .ground-overlay {
+            position: fixed;
+            bottom: -10px;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            z-index: 1;
+            pointer-events: none;
+            transition: opacity 1s;
+            opacity: 0;
+        }
+
+        body.winter .ground-overlay {
+            background: #fff;
+            box-shadow: 0 -15px 50px 20px #fff;
+            border-radius: 50% 50% 0 0 / 20px 20px 0 0;
+            opacity: 1;
+        }
+
+        #particles-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .season-selector {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1001;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            justify-content: flex-end;
+        }
+
+        .gear-btn {
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            color: white;
+            font-size: 20px;
+            padding: 8px;
+            border-radius: 50%;
+            cursor: pointer;
+            backdrop-filter: blur(8px);
+            transition: transform 0.3s, box-shadow 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .gear-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+        }
+
+        #gearBtn:hover {
+            transform: rotate(90deg);
+        }
+
+        .season-menu {
+            position: absolute;
+            top: 50px;
+            right: 0;
+            background: white;
+            border-radius: 12px;
+            padding: 10px;
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            z-index: 1002;
+        }
+
+        .season-menu button {
+            border: none;
+            background: #f0f0f0;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            color: #111;
+            white-space: nowrap;
+            transition: background 0.2s;
+        }
+
+        .season-menu button:hover {
+            background: #e0e0e0;
+        }
+
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%
+            }
+
+            50% {
+                background-position: 100% 50%
+            }
+
+            100% {
+                background-position: 0% 50%
+            }
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 24px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .live-clock {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            padding: 16px 20px;
+            border-radius: 16px;
+            backdrop-filter: blur(8px);
+            background: var(--card);
+            border: 1px solid var(--card-border);
+        }
+
+        .live-clock h1 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 800;
+        }
+
+        .clock-value {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .panel {
+            margin-top: 16px;
+            padding: 18px;
+            border-radius: 16px;
+            backdrop-filter: blur(8px);
+            background: var(--card);
+            border: 1px solid var(--card-border);
+        }
+
+        .panel h2 {
+            margin: 0 0 12px;
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px 16px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .field label {
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .field input,
+        .field select {
+            border-radius: 10px;
+            border: 1px solid var(--card-border);
+            padding: 10px 12px;
+            background: rgba(255, 255, 255, 0.92);
+            color: var(--text-dark);
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s ease-in-out;
+        }
+
+        #salaryPerShift {
+            cursor: default;
+        }
+
+        .field-tooltip {
+            position: relative;
+        }
+
+        @media (min-width: 481px) {
+            .field-tooltip:hover::before {
+                content: "Это поле рассчитывается автоматически и не подлежит редактированию";
+                position: absolute;
+                bottom: 100%;
+                left: 50%;
+                transform: translateX(-50%) translateY(-8px);
+                padding: 8px 12px;
+                border-radius: 8px;
+                z-index: 1000;
+                background-color: #fff;
+                color: Red;
+                border: 2px solid Red;
+                font-size: 16px;
+                font-weight: 700;
+                white-space: nowrap;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+                pointer-events: none;
+                display: block;
+            }
+
+            .field-tooltip.active::before {
+                display: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .field-tooltip:hover::before {
+                display: none !important;
+            }
+
+            .field-tooltip.active::before {
+                content: "Это поле рассчитывается автоматически и не подлежит редактированию";
+                display: block !important;
+                position: absolute;
+                bottom: 96%;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 200px;
+                padding: 10px;
+                background-color: #fff;
+                color: Red;
+                border: 2px solid Red;
+                border-radius: 8px;
+                font-size: 13px;
+                font-weight: 700;
+                text-align: center;
+                z-index: 10000;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            }
+
+            #salaryPerShift {
+                pointer-events: none;
+            }
+        }
+
+        .actions {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            cursor: pointer;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-weight: 800;
+            color: var(--text-dark);
+            background: #fff;
+            transition: transform 0.08s ease, box-shadow 0.2s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn.primary {
+            background: #ffd400;
+        }
+
+        .stats {
+            margin-top: 12px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px 16px;
+        }
+
+        .stat-card {
+            padding: 12px;
+            border-radius: 12px;
+            backdrop-filter: blur(8px);
+            background: var(--card);
+            border: 1px solid var(--card-border);
+        }
+
+        .stat-card .label {
+            font-size: 13px;
+            opacity: 0.95;
+        }
+
+        .stat-card .value {
+            font-size: 20px;
+            font-weight: 900;
+        }
+
+        .pay-highlight {
+            border: 2px solid var(--highlight-pay);
+        }
+
+        .pay-highlight .value {
+            color: var(--highlight-pay);
+        }
+
+        .calendar {
+            margin-top: 16px;
+            padding: 16px;
+            border-radius: 16px;
+            backdrop-filter: blur(8px);
+            background: var(--card);
+            border: 1px solid var(--card-border);
+        }
+
+        .cal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .cal-title {
+            font-size: 18px;
+            font-weight: 900;
+        }
+
+        .cal-stats {
+            font-size: 14px;
+        }
+
+        .cal-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+        }
+
+        .cal-weekday {
+            text-align: center;
+            font-weight: 800;
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .day {
+            min-height: 64px;
+            border-radius: 10px;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.94);
+            color: var(--text-dark);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border: 2px solid transparent;
+            position: relative;
+        }
+
+        .day-number {
+            font-weight: 900;
+        }
+
+        .badge {
+            margin-top: 6px;
+            font-size: 12px;
+            font-weight: 800;
+            border-radius: 8px;
+            padding: 4px 6px;
+            display: inline-block;
+            color: #111;
+            background: #7cff00;
+            line-height: 1;
+        }
+
+        .rest {
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .shift {
+            border-color: #00d4ff;
+        }
+
+        .night .badge {
+            background: #00d4ff;
+            color: #111;
+        }
+
+        .pay-day {
+            border-color: var(--highlight-pay) !important;
+        }
+
+        .pay-day::after {
+            content: '💰';
+            position: absolute;
+            top: 2px;
+            right: 4px;
+            font-size: 16px;
+        }
+
+        .note {
+            color: #03251a !important;
+        }
+
+        .hint-text {
+            color: #2F4F4F !important;
+            text-shadow: 0px 1px 2px rgba(0, 0, 0, 0.25);
+
+        }
+
+        body.night .hint-text {
+            color: #e8eeff !important;
+            text-shadow: 0 0 4px rgba(255, 255, 255, 0.25),
+                0 0 10px rgba(255, 255, 255, 0.15);
+
+        }
+
+        .label,
+        .value {
+            color: #6f00ff !important;
+            text-shadow: 0 0 3px rgb(255, 255, 255),
+                0 0 6px rgba(255, 255, 255, 0.9),
+                0 0 10px rgba(255, 255, 255, 0.8);
+
+        }
+
+        body.night .label,
+        body.night .value {
+            color: #ffe680 !important;
+            text-shadow: 0 0 4px rgba(255, 230, 128, 0.9),
+                0 0 8px rgba(255, 230, 128, 0.7),
+                0 0 14px rgba(255, 230, 128, 0.5);
+
+        }
+
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            appearance: none;
+            margin: 0;
+        }
+
+        @media (max-width: 480px) {
+
+            .cal-grid {
+                display: grid;
+                grid-template-columns: repeat(7, 1fr);
+                gap: 1px !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                box-sizing: border-box;
+            }
+
+            .day {
+                padding: 2px !important;
+                min-height: 30px !important;
+                box-sizing: border-box !important;
+            }
+
+            .day-number {
+                font-size: 9px !important;
+                font-weight: 700 !important;
+                line-height: 1 !important;
+            }
+
+            .badge {
+                font-size: 6px !important;
+                padding: 1px 2px !important;
+                line-height: 1 !important;
+                white-space: nowrap !important;
+            }
+
+            .cal-weekday {
+                font-size: 8px !important;
+                line-height: 1 !important;
+            }
+
+            .cal-title {
+                font-size: 14px !important;
+            }
+
+            .cal-stats {
+                font-size: 9px !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+
+            .cal-grid {
+                display: grid;
+                grid-template-columns: repeat(7, 1fr);
+                gap: 1px !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                box-sizing: border-box;
+            }
+
+            .day {
+                padding: 2px !important;
+                min-height: 30px !important;
+                box-sizing: border-box !important;
+            }
+
+            .day-number {
+                font-size: 9px !important;
+                font-weight: 700 !important;
+                line-height: 1 !important;
+            }
+
+            .badge {
+                font-size: 6px !important;
+                padding: 1px 2px !important;
+                line-height: 1 !important;
+                white-space: nowrap !important;
+            }
+
+            .cal-weekday {
+                font-size: 8px !important;
+                line-height: 1 !important;
+            }
+
+            .cal-title {
+                font-size: 14px !important;
+            }
+
+            .cal-stats {
+                font-size: 9px !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .cal-grid {
+                display: grid;
+                grid-template-columns: repeat(7, 1fr);
+                gap: 1px !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                box-sizing: border-box;
+            }
+
+            .day {
+                padding: 2px !important;
+                min-height: 30px !important;
+                box-sizing: border-box !important;
+            }
+
+            .pay-day::after {
+                font-size: 10px !important;
+                top: 1px !important;
+                right: 1px !important;
+            }
+
+            .day-number {
+                font-size: 9px !important;
+                font-weight: 700 !important;
+                line-height: 1 !important;
+            }
+
+            .badge {
+                font-size: 6px !important;
+                padding: 1px 2px !important;
+                line-height: 1 !important;
+                white-space: nowrap !important;
+            }
+
+            .cal-weekday {
+                font-size: 8px !important;
+                line-height: 1 !important;
+            }
+
+            .cal-title {
+                font-size: 14px !important;
+            }
+
+            .cal-stats {
+                font-size: 9px !important;
+            }
+        }
+
+        ::selection {
+            background: transparent;
+            color: #008080;
+            font-weight: bold;
+        }
+
+        ::-moz-selection {
+            background: transparent;
+            color: #008080;
+            font-weight: bold;
+        }
+
+        @media (max-width: 480px) {
+            .season-selector {
+                top: 10px;
+                right: 10px;
+                scale: 0.8;
+            }
+        }
+
+        body.winter .field label,
+        body.winter h1,
+        body.winter h2,
+        body.winter .stat-card .label,
+        body.winter #liveClock,
+        body.winter .cal-title,
+        body.winter .cal-stats,
+        body.winter .cal-weekday {
+            color: #1a237e !important;
+        }
+
+        body.spring .field label,
+        body.spring h1,
+        body.spring h2,
+        body.spring .stat-card .label,
+        body.spring #liveClock,
+        body.spring .cal-title,
+        body.spring .cal-stats,
+        body.spring .cal-weekday {
+            color: #1b5e20 !important;
+        }
+
+        body.summer .field label,
+        body.summer h1,
+        body.summer h2,
+        body.summer .stat-card .label,
+        body.summer #liveClock,
+        body.summer .cal-title,
+        body.summer .cal-stats,
+        body.summer .cal-weekday {
+            color: #006064 !important;
+        }
+
+        body.autumn .field label,
+        body.autumn h1,
+        body.autumn h2,
+        body.autumn .stat-card .label,
+        body.autumn #liveClock,
+        body.autumn .cal-title,
+        body.autumn .cal-stats,
+        body.autumn .cal-weekday {
+            color: #bf360c !important;
+        }
+
+        body.night .field label,
+        body.night h1,
+        body.night h2,
+        body.night .stat-card .label,
+        body.night #liveClock,
+        body.night .cal-title,
+        body.night .cal-stats,
+        body.night .cal-weekday {
+            color: #ffe680 !important;
+            text-shadow: 0 0 8px rgba(255, 230, 128, 0.6) !important;
+        }
+
+        .season-selector {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 1001;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            justify-content: flex-end;
+        }
+    </style>
+</head>
+<body>
+    <div id="night-stars"></div>
+    <div id="moon"></div>
+    <div id="particles-container"></div>
+    <div class="ground-overlay"></div>
+
+    <div class="season-selector">
+        <button class="gear-btn" id="gearBtn">⚙️</button>
+        <button class="gear-btn" id="musicToggle">🔇</button>
+
+        <div class="season-menu" id="seasonMenu">
+            <button onclick="setSeason('winter')">❄️ Зима</button>
+            <button onclick="setSeason('spring')">🌸 Весна</button>
+            <button onclick="setSeason('summer')">☀️ Лето</button>
+            <button onclick="setSeason('autumn')">🍂 Осень</button>
+            <button onclick="setSeason('auto')">🔄 Автоматически</button>
+        </div>
+    </div>
+    <div class="container">
+        <div class="live-clock">
+            <h1>График смен — Калькулятор Зарплаты (Фиксированный)</h1>
+            <div class="clock-value" id="liveClock">Загрузка…</div>
+        </div>
+
+        <form id="calcForm" class="panel">
+            <h2>Параметры</h2>
+            <div class="grid">
+                <div class="field">
+                    <label for="firstDay">Дата первого рабочего дня:</label>
+                    <input type="date" id="firstDay" name="firstDay" autocomplete="off" />
+                </div>
+
+                <div class="field">
+                    <label for="shiftType">Тип сменности:</label>
+                    <select id="shiftType" name="shiftType" autocomplete="off">
+                        <option value="1/1">1/1</option>
+                        <option value="1/2">1/2</option>
+                        <option value="1/3">1/3</option>
+                        <option value="2/2" selected>2/2</option>
+                        <option value="3/3">3/3</option>
+                        <option value="5/2">5/2 (пн–пт)</option>
+                        <option value="2/2_night">2/2 (ночные)</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="monthsCount">На сколько месяцев рассчитать:</label>
+                    <select id="monthsCount" name="monthsCount" autocomplete="off">
+                        <option value="1" selected>1 месяц</option>
+                        <option value="2">2 месяца</option>
+                        <option value="3">3 месяца</option>
+                        <option value="4">4 месяца</option>
+                        <option value="5">5 месяцев</option>
+                        <option value="6">6 месяцев</option>
+                        <option value="7">7 месяцев</option>
+                        <option value="8">8 месяцев</option>
+                        <option value="9">9 месяцев</option>
+                        <option value="10">10 месяцев</option>
+                        <option value="11">11 месяцев</option>
+                        <option value="12">12 месяцев</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="hoursPerShift">Часов в смене:</label>
+                    <select id="hoursPerShift" name="hoursPerShift" autocomplete="off">
+                        <option value="0" selected>0</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="fixedMonthlySalary">Фиксированная ЗП за месяц (₽):</label>
+                    <input type="number" id="fixedMonthlySalary" name="fixedMonthlySalary" min="0" value="0"
+                        autocomplete="off" />
+                </div>
+
+                <div class="field field-tooltip">
+                    <label for="salaryPerShift">ЗП за смену (для инфо):</label>
+                    <input type="text" id="salaryPerShift" name="salaryPerShift" value="0" autocomplete="off"
+                        readonly />
+                </div>
+
+                <div class="field">
+                    <label for="advanceDay">Дата аванса (число):</label>
+                    <select id="advanceDay" name="advanceDay" autocomplete="off">
+                        <option value="0" selected>0</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="advancePercent">Процент аванса (%):</label>
+                    <select id="advancePercent" name="advancePercent" autocomplete="off">
+                        <option value="0" selected>0</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="paycheckDay">Дата зарплаты (число):</label>
+                    <select id="paycheckDay" name="paycheckDay" autocomplete="off">
+                        <option value="0" selected>0</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button type="button" class="btn primary" id="calcBtn">Рассчитать</button>
+                <button type="button" class="btn" id="todayBtn">Сбросить на текущую дату</button>
+            </div>
+
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="label">Смен в этом месяце:</div>
+                    <div class="value" id="shiftsInMonth">—</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Зарплата за этот месяц (₽):</div>
+                    <div class="value" id="salaryInMonth">—</div>
+                </div>
+                <div class="stat-card pay-highlight">
+                    <div class="label">Ожидаемый Аванс (₽):</div>
+                    <div class="value" id="advanceAmount">—</div>
+                </div>
+                <div class="stat-card pay-highlight">
+                    <div class="label">Ожидаемая Зарплата (₽):</div>
+                    <div class="value" id="paycheckAmount">—</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Общая Зарплата (период, ₽):</div>
+                    <div class="value" id="totalSalaryOverall">—</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Всего часов (период):</div>
+                    <div class="value" id="totalHours">—</div>
+                </div>
+            </div>
+        </form>
+
+        <div id="calendars"></div>
+
+        <div class="note">
+            <p class="hint-text">
+                Подсветка: рабочие дни — с синей рамкой и зелёным бейджем.
+                Дни выплат отмечены тёмно-синей рамкой и значком ✦💰✦.
+            </p>
+        </div>
+    </div>
+
+    <audio id="calcSound" src="calc.mp3"></audio>
+
+    <script>
+        let activeSeason = 'winter';
+        const seasonSounds = {
+            winter: 'winter.mp3',
+            spring: 'spring.mp3',
+            summer: 'summer.mp3',
+            autumn: 'autumn.mp3',
+            night: 'night.mp3'
+        };
+
+        let bgAudio = new Audio();
+        bgAudio.loop = true;
+        bgAudio.volume = 0.35;
+        let targetVolume = 0.35;
+        let fadeInterval = null;
+        let musicEnabled = false;
+        let hasStartedMusic = false;
+
+        function fadeAudio(toVolume, callback) {
+            if (fadeInterval) clearInterval(fadeInterval);
+
+            fadeInterval = setInterval(() => {
+                if (Math.abs(bgAudio.volume - toVolume) < 0.02) {
+                    bgAudio.volume = toVolume;
+                    clearInterval(fadeInterval);
+                    if (callback) callback();
+                    return;
+                }
+                bgAudio.volume += (toVolume - bgAudio.volume) * 0.1;
+            }, 50);
+        }
+
+        function startMusicIfNeeded() {
+            if (!musicEnabled) return;
+
+            if (!hasStartedMusic) {
+                bgAudio.src = seasonSounds[activeSeason];
+                bgAudio.currentTime = 0;
+                bgAudio.volume = targetVolume;
+                bgAudio.play().catch(() => { });
+                hasStartedMusic = true;
+            } else if (bgAudio.paused) {
+                bgAudio.play().catch(() => { });
+            }
+        }
+
+        function switchSeasonTrackWithFade() {
+            if (!hasStartedMusic || !musicEnabled) return;
+            fadeAudio(0, () => {
+                bgAudio.src = seasonSounds[activeSeason];
+                bgAudio.currentTime = 0;
+                bgAudio.play().catch(() => { });
+                fadeAudio(targetVolume);
+            });
+        }
+
+        document.getElementById('musicToggle').onclick = () => {
+            musicEnabled = !musicEnabled;
+
+            if (musicEnabled) {
+                document.getElementById('musicToggle').textContent = "🔊";
+                startMusicIfNeeded();
+            } else {
+                document.getElementById('musicToggle').textContent = "🔇";
+                bgAudio.pause();
+            }
+        };
+
+
+
+        const gearBtn = document.getElementById('gearBtn');
+        const seasonMenu = document.getElementById('seasonMenu');
+        let hideTimeout = null;
+
+        function toggleMenu(forceState) {
+            if (forceState === 'show') {
+                clearTimeout(hideTimeout);
+                seasonMenu.style.display = 'flex';
+            } else if (forceState === 'hide') {
+                hideTimeout = setTimeout(() => {
+                    seasonMenu.style.display = 'none';
+                }, 300);
+            } else {
+                const isVisible = seasonMenu.style.display === 'flex';
+                seasonMenu.style.display = isVisible ? 'none' : 'flex';
+            }
+        }
+
+        gearBtn.addEventListener('pointerenter', (e) => {
+            if (e.pointerType === 'mouse') toggleMenu('show');
+        });
+
+        gearBtn.addEventListener('pointerleave', (e) => {
+            if (e.pointerType === 'mouse') toggleMenu('hide');
+        });
+
+        seasonMenu.addEventListener('pointerenter', (e) => {
+            if (e.pointerType === 'mouse') toggleMenu('show');
+        });
+
+        seasonMenu.addEventListener('pointerleave', (e) => {
+            if (e.pointerType === 'mouse') toggleMenu('hide');
+        });
+
+        gearBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            toggleMenu();
+        });
+
+        window.addEventListener('click', () => {
+            seasonMenu.style.display = 'none';
+        });
+
+        seasonMenu.addEventListener('click', (e) => e.stopPropagation());
+
+        function initSeasons(forcedSeason) {
+            const month = new Date().getMonth() + 1;
+            const body = document.body;
+            const container = document.getElementById('particles-container');
+            container.innerHTML = '';
+            body.classList.remove('winter', 'spring', 'summer', 'autumn');
+
+            if (isNightTime()) {
+                activeSeason = 'night';
+                body.classList.add('night');
+                return;
+            }
+
+            let season = forcedSeason;
+            if (!forcedSeason || forcedSeason === 'auto') {
+                if (month === 12 || month === 1 || month === 2) season = 'winter';
+                else if (month >= 3 && month <= 5) season = 'spring';
+                else if (month >= 6 && month <= 8) season = 'summer';
+                else season = 'autumn';
+            }
+
+            activeSeason = season;
+            body.classList.add(season);
+
+            let particleChar = '❄';
+            if (season === 'spring') particleChar = '🌸';
+            else if (season === 'summer') particleChar = '✨';
+            else if (season === 'autumn') particleChar = '🍂';
+
+            function createParticle() {
+                const p = document.createElement('div');
+                p.innerHTML = particleChar;
+                p.style.position = 'fixed';
+                p.style.top = '-20px';
+                p.style.left = Math.random() * 100 + 'vw';
+                p.style.fontSize = (Math.random() * 20 + 10) + 'px';
+                p.style.color = 'white';
+                p.style.zIndex = '5';
+                p.style.pointerEvents = 'none';
+
+                const container = document.getElementById('particles-container');
+                container.appendChild(p);
+                const duration = Math.random() * 5 + 5;
+                const rotation = Math.random() * 360;
+                const anim = p.animate(
+                    [
+                        { transform: `translateY(0) rotate(0deg)`, opacity: 1 },
+                        { transform: `translateY(110vh) rotate(${rotation}deg)`, opacity: 0.3 }
+                    ],
+                    { duration: duration * 1000, easing: 'linear' }
+                );
+                anim.onfinish = () => p.remove();
+            }
+
+            if (window.seasonInterval) clearInterval(window.seasonInterval);
+            window.seasonInterval = setInterval(createParticle, 400);
+        }
+
+        function setSeason(s) {
+            initSeasons(s);
+            document.getElementById('seasonMenu').style.display = 'none';
+            switchSeasonTrackWithFade();
+        }
+
+        window.onclick = () => document.getElementById('seasonMenu').style.display = 'none';
+
+        const clockEl = document.getElementById('liveClock');
+        const ruMonthsFull = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
+        const pad = n => n.toString().padStart(2, '0');
+
+        function updateClock() {
+            const now = new Date();
+            clockEl.textContent = `${pad(now.getDate())} ${ruMonthsFull[now.getMonth()]} ${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+        }
+        setInterval(updateClock, 250);
+        updateClock();
+
+        const endOfMonth = date => new Date(date.getFullYear(), date.getMonth() + 1, 0);
+        const addDays = (date, days) => new Date(date.getFullYear(), date.getMonth(), date.getDate() + days);
+
+        function isNightTime() {
+            const h = new Date().getHours();
+            return h >= 22 || h < 5;
+        }
+
+        function getPattern(shiftType) {
+            if (shiftType === '1/1') return [true, false];
+            if (shiftType === '1/2') return [true, false, false];
+            if (shiftType === '1/3') return [true, false, false, false];
+            if (shiftType === '2/2' || shiftType === '2/2_night') return [true, true, false, false];
+            if (shiftType === '3/3') return [true, true, true, false, false, false];
+            if (shiftType === '5/2') return [true, true, true, true, true, false, false];
+            return [true, false];
+        }
+
+        const isNight = type => type === '2/2_night';
+        const formatCurrency = amount => amount.toLocaleString('ru-RU', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+
+        function generateOptions(selectElement, start, end, selectedValue = 0) {
+            while (selectElement.options.length > 1) selectElement.remove(1);
+            for (let i = start; i <= end; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                selectElement.appendChild(option);
+            }
+        }
+
+        const calcForm = document.getElementById('calcForm');
+        const firstDayInput = document.getElementById('firstDay');
+        const shiftTypeInput = document.getElementById('shiftType');
+        const hoursInput = document.getElementById('hoursPerShift');
+        const monthsInput = document.getElementById('monthsCount');
+        const fixedSalaryInput = document.getElementById('fixedMonthlySalary');
+        const salaryInput = document.getElementById('salaryPerShift');
+        const advanceDayInput = document.getElementById('advanceDay');
+        const advancePercentInput = document.getElementById('advancePercent');
+        const paycheckDayInput = document.getElementById('paycheckDay');
+        const calcBtn = document.getElementById('calcBtn');
+        const todayBtn = document.getElementById('todayBtn');
+
+        const calcSound = document.getElementById('calcSound');
+        calcSound.loop = false;
+
+        fixedSalaryInput.addEventListener('focus', function () {
+            if (this.value === '0') this.value = '';
+        });
+
+        fixedSalaryInput.addEventListener('blur', function () {
+            if (this.value.trim() === '') this.value = '0';
+        });
+
+        function setTodayAsFirstDay(skipEvent = false) {
+            const today = new Date();
+            const iso = new Date(today.getTime() - today.getTimezoneOffset() * 60000).toISOString().split('T')[0];
+            firstDayInput.value = iso;
+            if (!skipEvent) firstDayInput.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+
+        function countShiftsInCurrentMonth(baseFirstWorkDay, shiftType) {
+            const pattern = getPattern(shiftType);
+            const now = new Date();
+            const year = now.getFullYear();
+            const monthIndex = now.getMonth();
+            const monthStart = new Date(year, monthIndex, 1);
+            const monthEnd = endOfMonth(monthStart);
+
+            function isWorkDay(date) {
+                if (shiftType === '5/2') {
+                    const wd = date.getDay();
+                    return wd >= 1 && wd <= 5;
+                } else {
+                    const baseUtc = Date.UTC(baseFirstWorkDay.getFullYear(), baseFirstWorkDay.getMonth(), baseFirstWorkDay.getDate());
+                    const currentUtc = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
+                    const diffDays = Math.round((currentUtc - baseUtc) / 86400000);
+                    const patternLength = pattern.length;
+                    const idx = ((diffDays % patternLength) + patternLength) % patternLength;
+                    return pattern[idx];
+                }
+            }
+
+            let shiftsCount = 0;
+            for (let d = new Date(monthStart); d <= monthEnd; d = addDays(d, 1)) {
+                if (isWorkDay(d)) shiftsCount++;
+            }
+            return shiftsCount;
+        }
+
+        function calculateShiftSalary() {
+            if (!firstDayInput.value) setTodayAsFirstDay(true);
+            const firstWorkDay = new Date(firstDayInput.value + 'T00:00:00');
+            const shiftType = shiftTypeInput.value;
+            const fixedMonthlySalary = parseInt(fixedSalaryInput.value || '0', 10);
+            const shiftsInMonth = countShiftsInCurrentMonth(firstWorkDay, shiftType);
+            let salaryPerShift = 0;
+            if (fixedMonthlySalary > 0 && shiftsInMonth > 0) salaryPerShift = fixedMonthlySalary / shiftsInMonth;
+            salaryInput.value = salaryPerShift > 0 ? formatCurrency(salaryPerShift) : '0';
+        }
+
+        function buildCalendarForMonth(baseFirstWorkDay, shiftType, hoursPerShift, year, monthIndex, advanceDay, paycheckDay) {
+            const pattern = getPattern(shiftType);
+            const nightFlag = isNight(shiftType);
+            const monthStart = new Date(year, monthIndex, 1);
+            const monthEnd = endOfMonth(monthStart);
+            const monthDaysCount = monthEnd.getDate();
+
+            function isWorkDay(date) {
+                if (shiftType === '5/2') {
+                    const wd = date.getDay();
+                    return wd >= 1 && wd <= 5;
+                } else {
+                    const baseUtc = Date.UTC(baseFirstWorkDay.getFullYear(), baseFirstWorkDay.getMonth(), baseFirstWorkDay.getDate());
+                    const currentUtc = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
+                    const diffDays = Math.round((currentUtc - baseUtc) / 86400000);
+                    const patternLength = pattern.length;
+                    const idx = ((diffDays % patternLength) + patternLength) % patternLength;
+                    return pattern[idx];
+                }
+            }
+            const days = [];
+            let shiftsCount = 0;
+            for (let d = new Date(monthStart); d <= monthEnd; d = addDays(d, 1)) {
+                const work = isWorkDay(d);
+                if (work) shiftsCount++;
+                let isAdvanceDay = (advanceDay > 0 && d.getDate() === advanceDay);
+                let isPaycheckDay = (paycheckDay > 0 && d.getDate() === paycheckDay);
+                days.push({ date: new Date(d), work, isAdvanceDay, isPaycheckDay });
+            }
+
+            const totalHours = shiftsCount * hoursPerShift;
+            const ruMonths = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+            const ruWeekdays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+
+            const wrap = document.createElement('div');
+            wrap.className = 'calendar';
+
+            const header = document.createElement('div');
+            header.className = 'cal-header';
+            header.innerHTML =
+                `<div class="cal-title">${ruMonths[monthIndex]} ${year}</div>` +
+                `<div class="cal-stats"><span style="font-weight:800;">Дней:</span><span style="margin-left:6px;">${monthDaysCount}</span><span style="margin-left:14px;font-weight:800;">Смен:</span><span style="margin-left:6px;">${shiftsCount}</span></div>`;
+            wrap.appendChild(header);
+
+            const grid = document.createElement('div');
+            grid.className = 'cal-grid';
+
+            ruWeekdays.forEach(w => {
+                const wd = document.createElement('div');
+                wd.className = 'cal-weekday';
+                wd.textContent = w;
+                grid.appendChild(wd);
+            });
+
+            const firstWeekday = (monthStart.getDay() + 6) % 7;
+            for (let i = 0; i < firstWeekday; i++) grid.appendChild(document.createElement('div'));
+
+            days.forEach(({ date, work, isAdvanceDay, isPaycheckDay }) => {
+                const cell = document.createElement('div');
+                let classes = 'day ' + (work ? 'shift' : 'rest');
+                if (isAdvanceDay || isPaycheckDay) classes += ' pay-day';
+                cell.className = classes;
+
+                const num = document.createElement('div');
+                num.className = 'day-number';
+                num.textContent = date.getDate();
+
+                const badge = document.createElement('div');
+                badge.className = 'badge';
+
+                if (work) {
+                    badge.textContent = nightFlag ? 'Ночная смена' : 'Смена';
+                    if (nightFlag) cell.classList.add('night');
+                } else {
+                    badge.textContent = 'Выходной';
+                    badge.style.background = '#ffd400';
+                }
+
+                cell.appendChild(num);
+                cell.appendChild(badge);
+                grid.appendChild(cell);
+            });
+
+            wrap.appendChild(grid);
+            return { element: wrap, shiftsCount, totalHours };
+        }
+
+        const calendarsRoot = document.getElementById('calendars');
+        const shiftsInMonthEl = document.getElementById('shiftsInMonth');
+        const totalHoursEl = document.getElementById('totalHours');
+        const salaryInMonthEl = document.getElementById('salaryInMonth');
+        const advanceAmountEl = document.getElementById('advanceAmount');
+        const paycheckAmountEl = document.getElementById('paycheckAmount');
+        const totalSalaryOverallEl = document.getElementById('totalSalaryOverall');
+
+        function renderMonths(firstWorkDay, shiftType, hoursPerShift, fixedMonthlySalary, advanceDay, advancePercent, paycheckDay, monthsCount) {
+            calendarsRoot.innerHTML = '';
+            let firstMonthShifts = 0;
+            let overallHours = 0;
+            const start = new Date(firstWorkDay.getFullYear(), firstWorkDay.getMonth(), 1);
+
+            for (let i = 0; i < monthsCount; i++) {
+                const dt = new Date(start.getFullYear(), start.getMonth() + i, 1);
+                const { element, shiftsCount, totalHours } = buildCalendarForMonth(
+                    firstWorkDay, shiftType, hoursPerShift,
+                    dt.getFullYear(), dt.getMonth(), advanceDay, paycheckDay
+                );
+                calendarsRoot.appendChild(element);
+                overallHours += totalHours;
+                if (i === 0) firstMonthShifts = shiftsCount;
+            }
+
+            const advance = Math.round(fixedMonthlySalary * (advancePercent / 100));
+            const paycheck = fixedMonthlySalary - advance;
+
+            shiftsInMonthEl.textContent = firstMonthShifts;
+            totalHoursEl.textContent = overallHours;
+            salaryInMonthEl.textContent = fixedMonthlySalary > 0 ? formatCurrency(fixedMonthlySalary) + ' ₽' : '—';
+            totalSalaryOverallEl.textContent = (fixedMonthlySalary * monthsCount) > 0 ? formatCurrency(fixedMonthlySalary * monthsCount) + ' ₽' : '—';
+            advanceAmountEl.textContent = advance > 0 ? formatCurrency(advance) + ' ₽' : '—';
+            paycheckAmountEl.textContent = paycheck > 0 ? formatCurrency(paycheck) + ' ₽' : '—';
+        }
+
+        function setAllDefaults() {
+            calcForm.reset();
+            setTodayAsFirstDay();
+            shiftTypeInput.value = '2/2';
+            monthsInput.value = '1';
+            fixedSalaryInput.value = '0';
+            salaryInput.value = '0';
+            hoursInput.value = '0';
+            advanceDayInput.value = '0';
+            advancePercentInput.value = '0';
+            paycheckDayInput.value = '0';
+        }
+
+        function triggerCalc() {
+            calcSound.pause();
+            calcSound.currentTime = 0;
+            calcSound.play().catch(() => { });
+
+            if (!musicEnabled) {
+                musicEnabled = true;
+                document.getElementById('musicToggle').textContent = "🔊";
+            }
+            startMusicIfNeeded();
+
+            calculateShiftSalary();
+            const firstWorkDay = new Date(firstDayInput.value + 'T00:00:00');
+            const shiftType = shiftTypeInput.value;
+            const hoursPerShift = parseInt(hoursInput.value, 10);
+            const fixedMonthlySalary = parseInt(fixedSalaryInput.value || '0', 10);
+            const advanceDay = parseInt(advanceDayInput.value, 10);
+            const advancePercent = parseInt(advancePercentInput.value, 10);
+            const paycheckDay = parseInt(paycheckDayInput.value, 10);
+            const monthsCount = parseInt(monthsInput.value || '1', 10);
+
+            renderMonths(firstWorkDay, shiftType, hoursPerShift, fixedMonthlySalary, advanceDay, advancePercent, paycheckDay, monthsCount);
+        }
+
+        fixedSalaryInput.addEventListener('input', calculateShiftSalary);
+        firstDayInput.addEventListener('input', calculateShiftSalary);
+        shiftTypeInput.addEventListener('input', calculateShiftSalary);
+        calcBtn.addEventListener('click', triggerCalc);
+        todayBtn.addEventListener('click', () => {
+            setAllDefaults();
+            setTimeout(triggerCalc, 50);
+        });
+
+        (function setup() {
+            generateOptions(hoursInput, 1, 24);
+            generateOptions(advanceDayInput, 1, 31);
+            generateOptions(paycheckDayInput, 1, 31);
+            generateOptions(advancePercentInput, 1, 100);
+            setAllDefaults();
+            initSeasons('auto');
+            setTimeout(triggerCalc, 100);
+        })();
+
+        function generateStars() {
+            const container = document.getElementById('night-stars');
+            container.innerHTML = '';
+
+            for (let i = 0; i < 80; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                star.style.top = Math.random() * 100 + '%';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.animationDelay = (Math.random() * 2) + 's';
+                container.appendChild(star);
+            }
+        }
+
+        generateStars();
+
+        (function () {
+            const closeAll = () => {
+                document.querySelectorAll('.field-tooltip.active').forEach(el => {
+                    el.classList.remove('active');
+                });
+            };
+
+            const handleTooltip = function (event) {
+                const tooltip = event.target.closest('.field-tooltip');
+                const isMobile = window.innerWidth <= 480;
+
+                if (tooltip) {
+                    if (isMobile) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        tooltip.classList.toggle('active');
+                    } else {
+                        tooltip.classList.remove('active');
+                    }
+                } else {
+                    closeAll();
+                }
+            };
+
+            document.addEventListener('click', handleTooltip);
+            document.addEventListener('touchstart', handleTooltip, { passive: false });
+
+            window.addEventListener('scroll', function () {
+                if (window.innerWidth <= 480) {
+                    closeAll();
+                }
+            }, { passive: true });
+        })();
+    </script>
+</body>
+</html>
